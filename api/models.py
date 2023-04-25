@@ -48,3 +48,36 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     objects = UserManager()
 
+
+class Category(models.Model):
+    name = models.CharField(max_length=255)
+    slug = models.SlugField()
+
+
+class Genre(models.Model):
+    name = models.CharField(max_length=255)
+    slug = models.SlugField()
+
+
+class Title(models.Model):
+    name = models.CharField(max_length=255)
+    year = models.PositiveIntegerField(default=0)
+    rating = models.PositiveIntegerField(default=0)
+    description = models.TextField()
+    genre = models.ManyToManyField(Genre)
+    category = models.ForeignKey(Category, on_delete=models.DO_NOTHING)
+
+
+class Review(models.Model):
+    title = models.ForeignKey(Title, on_delete=models.CASCADE)
+    text = models.TextField()
+    author = models.ForeignKey(User, on_delete=models.CASCADE)
+    score = models.PositiveIntegerField(default=0)
+    pub_date = models.DateTimeField(auto_now_add=True)
+
+
+class Comment(models.Model):
+    review = models.ForeignKey(Review, on_delete=models.CASCADE)
+    text = models.TextField()
+    author = models.ForeignKey(User, on_delete=models.CASCADE)
+    pub_date = models.DateTimeField(auto_now_add=True)
