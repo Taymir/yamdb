@@ -1,19 +1,25 @@
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import get_template
-from rest_framework import status
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import status, mixins, filters
 from rest_framework.decorators import api_view, action
 from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
 from rest_framework.request import Request
 
-from rest_framework.viewsets import ModelViewSet
+from rest_framework.viewsets import ModelViewSet, GenericViewSet
 from rest_framework_simplejwt.tokens import AccessToken
 
 from api_yamdb import settings
-from .models import User
-from .serializers import UserSerializer, SendEmailSerializer, ConfirmEmailSerializer
-from rest_framework.permissions import AllowAny, IsAuthenticated, IsAdminUser, IsAuthenticatedOrReadOnly
+from .filters import TitleFilter
+from .models import User, Title, Category, Genre
+from .permissions import IsAdminOrReadOnly
+from .serializers import UserSerializer, SendEmailSerializer, ConfirmEmailSerializer, TitleSerializer, \
+    CategorySerializer, GenreSerializer
+from rest_framework.permissions import (IsAuthenticated,
+                                        IsAdminUser
+                                        )
 
 
 @api_view(http_method_names=('POST',))
@@ -86,3 +92,34 @@ class UserViewSet(ModelViewSet):
             serializer = self.get_serializer(user)
 
         return Response(serializer.data)
+
+
+class GetPostDeleteViewSet(mixins.CreateModelMixin,
+                           mixins.DestroyModelMixin,
+                           mixins.ListModelMixin,
+                           GenericViewSet):
+    pass
+
+
+class GenreViewSet(GetPostDeleteViewSet):
+    queryset = Genre.objects.all()
+    serializer_class = GenreSerializer
+    permission_classes = [IsAdminOrReadOnly]
+    filter_backends = [filters.SearchFilter]
+    search_fields = ['name']
+
+
+class CategoryViewSet(GetPostDeleteViewSet):
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
+    permission_classes = [IsAdminOrReadOnly]
+    filter_backends = [filters.SearchFilter]
+    search_fields = ['name']
+
+
+class TitlesViewSet(ModelViewSet):
+    queryset = Title.objects.all()
+    serializer_class = TitleSerializer
+    permission_classes = [IsAdminOrReadOnly]
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = TitleFilter

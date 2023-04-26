@@ -63,7 +63,7 @@ class Title(models.Model):
     name = models.CharField(max_length=255)
     year = models.PositiveIntegerField(default=0)
     rating = models.PositiveIntegerField(default=0)
-    description = models.TextField()
+    description = models.TextField(blank=True, null=True)
     genre = models.ManyToManyField(Genre)
     category = models.ForeignKey(Category, on_delete=models.DO_NOTHING)
 

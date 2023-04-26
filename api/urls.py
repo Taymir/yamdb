@@ -6,6 +6,10 @@ from . import views
 
 router = DefaultRouter()
 router.register('users', views.UserViewSet)
+router.register('titles', views.TitlesViewSet)
+router.register('genres', views.GenreViewSet)
+router.register('categories', views.CategoryViewSet)
+
 
 urlpatterns = [
     # path('auth/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
