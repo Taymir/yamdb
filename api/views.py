@@ -13,12 +13,12 @@ from rest_framework_simplejwt.tokens import AccessToken
 
 from api_yamdb import settings
 from .filters import TitleFilter
-from .models import User, Title, Category, Genre
-from .permissions import IsAdminOrReadOnly
+from .models import User, Title, Category, Genre, Review
+from .permissions import IsAdminOrReadOnly, IsAuthorOrModeratorOrAdminOrReadOnly
 from .serializers import UserSerializer, SendEmailSerializer, ConfirmEmailSerializer, TitleSerializer, \
-    CategorySerializer, GenreSerializer
+    CategorySerializer, GenreSerializer, ReviewSerializer
 from rest_framework.permissions import (IsAuthenticated,
-                                        IsAdminUser
+                                        IsAdminUser, IsAuthenticatedOrReadOnly
                                         )
 
 
@@ -123,3 +123,17 @@ class TitlesViewSet(ModelViewSet):
     permission_classes = [IsAdminOrReadOnly]
     filter_backends = [DjangoFilterBackend]
     filterset_class = TitleFilter
+
+
+class ReviewViewSet(ModelViewSet):
+    queryset = Review.objects.all()
+    serializer_class = ReviewSerializer
+    permission_classes = [IsAuthenticatedOrReadOnly, IsAuthorOrModeratorOrAdminOrReadOnly]
+
+    def get_queryset(self):
+        title = get_object_or_404(Title, pk=self.kwargs['title_id'])
+        return Review.objects.filter(title=title.id)
+
+    def perform_create(self, serializer):
+        title = get_object_or_404(Title, pk=self.kwargs['title_id'])
+        serializer.save(author=self.request.user, title=title)
