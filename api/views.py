@@ -1,5 +1,6 @@
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import EmailMultiAlternatives
+from django.db.models import Avg
 from django.template.loader import get_template
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import status, mixins, filters
@@ -13,10 +14,10 @@ from rest_framework_simplejwt.tokens import AccessToken
 
 from api_yamdb import settings
 from .filters import TitleFilter
-from .models import User, Title, Category, Genre, Review
+from .models import User, Title, Category, Genre, Review, Comment
 from .permissions import IsAdminOrReadOnly, IsAuthorOrModeratorOrAdminOrReadOnly
 from .serializers import UserSerializer, SendEmailSerializer, ConfirmEmailSerializer, TitleSerializer, \
-    CategorySerializer, GenreSerializer, ReviewSerializer
+    CategorySerializer, GenreSerializer, ReviewSerializer, CommentSerializer
 from rest_framework.permissions import (IsAuthenticated,
                                         IsAdminUser, IsAuthenticatedOrReadOnly
                                         )
@@ -118,7 +119,7 @@ class CategoryViewSet(GetPostDeleteViewSet):
 
 
 class TitlesViewSet(ModelViewSet):
-    queryset = Title.objects.all()
+    queryset = Title.objects.all().annotate(rating=Avg("reviews__score"))
     serializer_class = TitleSerializer
     permission_classes = [IsAdminOrReadOnly]
     filter_backends = [DjangoFilterBackend]
@@ -137,3 +138,19 @@ class ReviewViewSet(ModelViewSet):
     def perform_create(self, serializer):
         title = get_object_or_404(Title, pk=self.kwargs['title_id'])
         serializer.save(author=self.request.user, title=title)
+
+
+class CommentViewSet(ModelViewSet):
+    queryset = Comment.objects.all()
+    serializer_class = CommentSerializer
+    permission_classes = [IsAuthenticatedOrReadOnly, IsAuthorOrModeratorOrAdminOrReadOnly]
+
+    def get_queryset(self):
+        title = get_object_or_404(Title, pk=self.kwargs['title_id'])
+        review = get_object_or_404(Review, pk=self.kwargs['review_id'], title=title)
+        return Comment.objects.filter(review=review)
+
+    def perform_create(self, serializer):
+        title = get_object_or_404(Title, pk=self.kwargs['title_id'])
+        review = get_object_or_404(Review, pk=self.kwargs['review_id'], title=title)
+        serializer.save(author=self.request.user, review=review)

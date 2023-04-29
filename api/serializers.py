@@ -32,6 +32,7 @@ class TitleSerializer(serializers.ModelSerializer):
         slug_field='slug',
         queryset=Genre.objects.all()
     )
+    rating = serializers.ReadOnlyField()
 
     class Meta:
         model = Title
@@ -69,9 +70,8 @@ class ReviewSerializer(serializers.ModelSerializer):
 class CommentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Comment
-        fields = ('text', 'author', 'pub_date', 'title')
+        fields = ('id', 'text', 'author', 'pub_date')
 
-    title = serializers.ReadOnlyField(source='title.id')
     author = serializers.SlugRelatedField(
         read_only=True,
         slug_field='username'
