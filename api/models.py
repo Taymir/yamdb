@@ -30,9 +30,9 @@ class User(AbstractBaseUser, PermissionsMixin):
     email = models.EmailField(max_length=255, unique=True, db_index=True)
     username = models.CharField(max_length=255, unique=True, db_index=True)
 
-    first_name = models.CharField(max_length=255)
-    last_name = models.CharField(max_length=255)
-    bio = models.TextField()
+    first_name = models.CharField(max_length=255, blank=True)
+    last_name = models.CharField(max_length=255, blank=True)
+    bio = models.TextField(blank=True)
     role = models.CharField(max_length=16, choices=ROLES, default=ROLES[0][0])
 
     # is_verified = models.BooleanField(default=False)

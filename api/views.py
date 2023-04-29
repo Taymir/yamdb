@@ -15,11 +15,11 @@ from rest_framework_simplejwt.tokens import AccessToken
 from api_yamdb import settings
 from .filters import TitleFilter
 from .models import User, Title, Category, Genre, Review, Comment
-from .permissions import IsAdminOrReadOnly, IsAuthorOrModeratorOrAdminOrReadOnly
+from .permissions import IsAdmin, IsAdminOrReadOnly, IsAuthorOrModeratorOrAdminOrReadOnly
 from .serializers import UserSerializer, SendEmailSerializer, ConfirmEmailSerializer, TitleSerializer, \
     CategorySerializer, GenreSerializer, ReviewSerializer, CommentSerializer
 from rest_framework.permissions import (IsAuthenticated,
-                                        IsAdminUser, IsAuthenticatedOrReadOnly
+                                        IsAuthenticatedOrReadOnly
                                         )
 
 
@@ -76,7 +76,7 @@ class UserViewSet(ModelViewSet):
     serializer_class = UserSerializer
     lookup_field = 'username'
     lookup_value_regex = '[A-Za-z0-9@-_.]+'
-    permission_classes = [IsAuthenticated & IsAdminUser]
+    permission_classes = [IsAdmin]
 
     @action(detail=False, methods=['GET', 'PATCH'], permission_classes=[IsAuthenticated])
     def me(self, request: Request, **kwargs):
@@ -85,10 +85,10 @@ class UserViewSet(ModelViewSet):
             serializer = self.get_serializer(user, data=request.data, partial=True)
             serializer.is_valid(raise_exception=True)
 
-            if not user.is_staff:
-                serializer.save(role=user.role, partial=True)
-            else:
-                serializer.save(partial=True)
+            # if not user.is_staff:
+            #     serializer.save(role=user.role, partial=True)
+            # else:
+            serializer.save(partial=True)
         else:
             serializer = self.get_serializer(user)
 
