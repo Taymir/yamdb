@@ -18,3 +18,4 @@ media/
 
 db.sqlite3
 emails/
+fixtures.json
