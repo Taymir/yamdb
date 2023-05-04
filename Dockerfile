@@ -5,4 +5,5 @@ COPY requirements.txt /code
 RUN pip install -r /code/requirements.txt
 COPY . /code
 WORKDIR /code
-CMD gunicorn api_yamdb.wsgi:application --bind 0.0.0.0:8000
+RUN cp docker.env .env
+CMD gunicorn api_yamdb.whitenoiseWSGI:application --bind 0.0.0.0:8000
