@@ -1,18 +1,29 @@
 version: '3.8'
+# Список docker volum-ов (Томов)
 volumes:
   postgres_data:
+  static_data:
+  nginx_conf:
 
+# Список сервисов - докер контейнеров
 services:
   db:
+    # Образ db основывается на образе постгрес
     image: postgres:15.2
+    container_name: db
+    restart: unless-stopped
     volumes:
+      # Использует том postgres_data
       - postgres_data:/var/lib/postgresql/data/
     env_file:
+      # Использует переменные окружения из .env файла
       - ./.env
 
   web:
+    # Образ web собирается на основе докерфайла в текущей папке
     build: .
     restart: always
+    container_name: web
     command: gunicorn api_yamdb.wsgi:application --bind 0.0.0.0:8000
     ports:
       - "8000:8000"
@@ -20,3 +31,18 @@ services:
       - db
     env_file:
       - ./.env
+    volumes:
+      - static_data:/code/static
+
+
+  nginx:
+    image: nginx:1.23
+    container_name: webserver
+    restart: unless-stopped
+    volumes:
+      - static_data:/static
+      - ./host.conf:/etc/nginx/conf.d/default.conf # Здесь используется не volume, а символическая ссылка на файл лежащий в текущей директории
+    ports:
+      - "8080:80"
+    depends_on:
+      - web
