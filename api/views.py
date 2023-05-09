@@ -16,8 +16,8 @@ from api_yamdb import settings
 from .filters import TitleFilter
 from .models import User, Title, Category, Genre, Review, Comment
 from .permissions import IsAdmin, IsAdminOrReadOnly, IsAuthorOrModeratorOrAdminOrReadOnly
-from .serializers import UserSerializer, SendEmailSerializer, ConfirmEmailSerializer, TitleSerializer, \
-    CategorySerializer, GenreSerializer, ReviewSerializer, CommentSerializer
+from .serializers import UserSerializer, SendEmailSerializer, ConfirmEmailSerializer, TitleReadSerializer, \
+    TitleWriteSerializer, CategorySerializer, GenreSerializer, ReviewSerializer, CommentSerializer
 from rest_framework.permissions import (IsAuthenticated,
                                         IsAuthenticatedOrReadOnly
                                         )
@@ -108,6 +108,7 @@ class GenreViewSet(GetPostDeleteViewSet):
     permission_classes = [IsAdminOrReadOnly]
     filter_backends = [filters.SearchFilter]
     search_fields = ['name']
+    lookup_field = 'slug'
 
 
 class CategoryViewSet(GetPostDeleteViewSet):
@@ -116,14 +117,19 @@ class CategoryViewSet(GetPostDeleteViewSet):
     permission_classes = [IsAdminOrReadOnly]
     filter_backends = [filters.SearchFilter]
     search_fields = ['name']
+    lookup_field = 'slug'
 
 
 class TitlesViewSet(ModelViewSet):
     queryset = Title.objects.all().annotate(rating=Avg("reviews__score"))
-    serializer_class = TitleSerializer
     permission_classes = [IsAdminOrReadOnly]
     filter_backends = [DjangoFilterBackend]
     filterset_class = TitleFilter
+
+    def get_serializer_class(self):
+        if self.action in ('list', 'retrieve'):
+            return TitleReadSerializer
+        return TitleWriteSerializer
 
 
 class ReviewViewSet(ModelViewSet):

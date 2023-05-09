@@ -18,7 +18,32 @@ class ConfirmEmailSerializer(serializers.Serializer):
     confirmation_code = serializers.CharField()
 
 
-class TitleSerializer(serializers.ModelSerializer):
+class CategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Category
+        lookup_field = 'slug'
+        fields = ('name', 'slug')
+
+
+class GenreSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Genre
+        lookup_field = 'slug'
+        fields = ('name', 'slug')
+
+
+class TitleReadSerializer(serializers.ModelSerializer):
+    genre = GenreSerializer(many=True, read_only=True)
+    category = CategorySerializer(read_only=True)
+
+    rating = serializers.IntegerField(read_only=True)
+
+    class Meta:
+        model = Title
+        fields = ('id', 'name', 'year', 'rating', 'description', 'genre', 'category')
+
+
+class TitleWriteSerializer(serializers.ModelSerializer):
     category = serializers.SlugRelatedField(
         many=False,
         read_only=False,
@@ -32,32 +57,20 @@ class TitleSerializer(serializers.ModelSerializer):
         slug_field='slug',
         queryset=Genre.objects.all()
     )
-    rating = serializers.ReadOnlyField()
 
     class Meta:
         model = Title
-        fields = ('id', 'name', 'year', 'rating', 'description', 'genre', 'category')
-
-
-class CategorySerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Category
-        fields = '__all__'
-
-
-class GenreSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Genre
-        fields = '__all__'
+        fields = ('id', 'name', 'year', 'description', 'genre', 'category')
 
 
 class ReviewSerializer(serializers.ModelSerializer):
     class Meta:
         model = Review
-        fields = '__all__'  # ('id', 'text', 'author', 'score', 'pub_date')
+        fields = ('id', 'text', 'author', 'score', 'pub_date')
 
     author = serializers.SlugRelatedField(read_only=True, slug_field='username')
-    title = TitleSerializer(read_only=True)
+    score = serializers.IntegerField(max_value=10, min_value=1)
+    #title = TitleWriteSerializer(read_only=True)
 
     def validate(self, attrs):
         if self.context['request'].method == 'POST' and Review.objects.filter(author=self.context['request'].user,
