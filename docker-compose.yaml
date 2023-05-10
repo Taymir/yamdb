@@ -21,10 +21,10 @@ services:
 
   web:
     # Образ web собирается на основе докерфайла в текущей папке
-    build: .
+    image: taymir007/yamdb:latest
     restart: always
     container_name: web
-    command: gunicorn api_yamdb.wsgi:application --bind 0.0.0.0:8000
+    #command: gunicorn api_yamdb.wsgi:application --bind 0.0.0.0:8000
     ports:
       - "8000:8000"
     depends_on:
