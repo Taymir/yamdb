@@ -68,7 +68,7 @@ jobs:
           username: ${{ secrets.YACLOUD_USER }}
           key: ${{ secrets.YACLOUD_SSHKEY }}
           source: "docker-compose.yaml, host.conf"
-          target: ~
+          target: .
 
       - name: executing remote ssh commands to deploy
         uses: appleboy/ssh-action@v0.1.10
