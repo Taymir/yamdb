@@ -57,7 +57,7 @@ jobs:
   deploy:
     name: Deploy image to Yandex Cloud
     runs-on: ubuntu-latest
-    needs: build_and_push_to_docker_hub
+    # needs: build_and_push_to_docker_hub
     steps:
       - name: executing remote ssh commands to deploy
         uses: appleboy/ssh-action@v0.1.10
@@ -65,7 +65,7 @@ jobs:
           host: ${{ secrets.YACLOUD_HOST }}
           username: ${{ secrets.YACLOUD_USER }}
           key: ${{ secrets.YACLOUD_SSHKEY }}
-          scripts: |
+          script: |
             sudo docker pull taymir007/yamdb
             sudo docker compose stop
             sudo docker compose up -d
