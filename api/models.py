@@ -51,12 +51,12 @@ class User(AbstractBaseUser, PermissionsMixin):
 
 class Category(models.Model):
     name = models.CharField(max_length=255)
-    slug = models.SlugField()
+    slug = models.SlugField(unique=True)
 
 
 class Genre(models.Model):
     name = models.CharField(max_length=255)
-    slug = models.SlugField()
+    slug = models.SlugField(unique=True)
 
 
 class Title(models.Model):
