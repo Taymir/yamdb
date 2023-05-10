@@ -6,7 +6,8 @@ from .models import User, Title, Category, Genre, Review, Comment
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ('first_name', 'last_name', 'username', 'bio', 'email', 'role')
+        fields = ('first_name', 'last_name',
+                  'username', 'bio', 'email', 'role')
 
 
 class SendEmailSerializer(serializers.Serializer):
@@ -40,7 +41,8 @@ class TitleReadSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Title
-        fields = ('id', 'name', 'year', 'rating', 'description', 'genre', 'category')
+        fields = ('id', 'name', 'year', 'rating',
+                  'description', 'genre', 'category')
 
 
 class TitleWriteSerializer(serializers.ModelSerializer):
@@ -66,17 +68,21 @@ class TitleWriteSerializer(serializers.ModelSerializer):
 class ReviewSerializer(serializers.ModelSerializer):
     class Meta:
         model = Review
-        fields = ('id', 'text', 'author', 'score', 'pub_date')
+        fields = ('id', 'text', 'author',
+                  'score', 'pub_date')
 
-    author = serializers.SlugRelatedField(read_only=True, slug_field='username')
+    author = serializers.SlugRelatedField(read_only=True,
+                                          slug_field='username')
     score = serializers.IntegerField(max_value=10, min_value=1)
-    #title = TitleWriteSerializer(read_only=True)
+    # title = TitleWriteSerializer(read_only=True)
 
     def validate(self, attrs):
-        if self.context['request'].method == 'POST' and Review.objects.filter(author=self.context['request'].user,
-                                                                              title=self.context['view'].kwargs.get(
-                                                                                  'title_id')).exists():
-            raise serializers.ValidationError("Пользователь уже оставлял отзыв на это произведение")
+        if self.context['request'].method == 'POST' and Review.objects.filter(
+                author=self.context['request'].user,
+                title=self.context['view'].kwargs.get(
+                    'title_id')).exists():
+            raise serializers.ValidationError(
+                "Пользователь уже оставлял отзыв на это произведение")
         return attrs
 
 

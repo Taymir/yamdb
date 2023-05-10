@@ -15,12 +15,26 @@ from rest_framework_simplejwt.tokens import AccessToken
 from api_yamdb import settings
 from .filters import TitleFilter
 from .models import User, Title, Category, Genre, Review, Comment
-from .permissions import IsAdmin, IsAdminOrReadOnly, IsAuthorOrModeratorOrAdminOrReadOnly
-from .serializers import UserSerializer, SendEmailSerializer, ConfirmEmailSerializer, TitleReadSerializer, \
-    TitleWriteSerializer, CategorySerializer, GenreSerializer, ReviewSerializer, CommentSerializer
-from rest_framework.permissions import (IsAuthenticated,
-                                        IsAuthenticatedOrReadOnly
-                                        )
+from .permissions import (
+    IsAdmin,
+    IsAdminOrReadOnly,
+    IsAuthorOrModeratorOrAdminOrReadOnly
+)
+from .serializers import (
+    UserSerializer,
+    SendEmailSerializer,
+    ConfirmEmailSerializer,
+    TitleReadSerializer,
+    TitleWriteSerializer,
+    CategorySerializer,
+    GenreSerializer,
+    ReviewSerializer,
+    CommentSerializer
+)
+from rest_framework.permissions import (
+    IsAuthenticated,
+    IsAuthenticatedOrReadOnly
+)
 
 
 @api_view(http_method_names=('POST',))
@@ -39,9 +53,12 @@ def send_email_confirmation(request):
     subject = 'Код подтверждения для авторизации пользователя'
     from_email = settings.EMAIL_SENT_FORM
     ctx = {'confirmation_code': token}
-    html_letter = get_template('email/send_email_confirmation.html').render(context=ctx)
-    plain_letter = get_template('email/send_email_confirmation.txt').render(context=ctx)
-    letter = EmailMultiAlternatives(subject, plain_letter, from_email, [email])
+    html_letter = get_template(
+        'email/send_email_confirmation.html').render(context=ctx)
+    plain_letter = get_template(
+        'email/send_email_confirmation.txt').render(context=ctx)
+    letter = EmailMultiAlternatives(
+        subject, plain_letter, from_email, [email])
     letter.attach_alternative(html_letter, 'text/html')
     letter.send()
     return Response('Confirmation mail sent')
@@ -54,7 +71,8 @@ def confirm_email(request):
     email = serializer.data.get('email')
     confirmation_code = serializer.data.get('confirmation_code')
     user = get_object_or_404(User, email=email)
-    correct_token = default_token_generator.check_token(user, confirmation_code)
+    correct_token = default_token_generator.check_token(
+        user, confirmation_code)
     if correct_token:
         user.is_active = True
         user.save()
@@ -78,11 +96,13 @@ class UserViewSet(ModelViewSet):
     lookup_value_regex = '[A-Za-z0-9@-_.]+'
     permission_classes = [IsAdmin]
 
-    @action(detail=False, methods=['GET', 'PATCH'], permission_classes=[IsAuthenticated])
+    @action(detail=False, methods=['GET', 'PATCH'],
+            permission_classes=[IsAuthenticated])
     def me(self, request: Request, **kwargs):
         user = request.user
         if request.method == 'PATCH':
-            serializer = self.get_serializer(user, data=request.data, partial=True)
+            serializer = self.get_serializer(user,
+                                             data=request.data, partial=True)
             serializer.is_valid(raise_exception=True)
 
             # if not user.is_staff:
@@ -135,7 +155,8 @@ class TitlesViewSet(ModelViewSet):
 class ReviewViewSet(ModelViewSet):
     queryset = Review.objects.all()
     serializer_class = ReviewSerializer
-    permission_classes = [IsAuthenticatedOrReadOnly, IsAuthorOrModeratorOrAdminOrReadOnly]
+    permission_classes = [IsAuthenticatedOrReadOnly,
+                          IsAuthorOrModeratorOrAdminOrReadOnly]
 
     def get_queryset(self):
         title = get_object_or_404(Title, pk=self.kwargs['title_id'])
@@ -149,14 +170,17 @@ class ReviewViewSet(ModelViewSet):
 class CommentViewSet(ModelViewSet):
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
-    permission_classes = [IsAuthenticatedOrReadOnly, IsAuthorOrModeratorOrAdminOrReadOnly]
+    permission_classes = [IsAuthenticatedOrReadOnly,
+                          IsAuthorOrModeratorOrAdminOrReadOnly]
 
     def get_queryset(self):
         title = get_object_or_404(Title, pk=self.kwargs['title_id'])
-        review = get_object_or_404(Review, pk=self.kwargs['review_id'], title=title)
+        review = get_object_or_404(
+            Review, pk=self.kwargs['review_id'], title=title)
         return Comment.objects.filter(review=review)
 
     def perform_create(self, serializer):
         title = get_object_or_404(Title, pk=self.kwargs['title_id'])
-        review = get_object_or_404(Review, pk=self.kwargs['review_id'], title=title)
+        review = get_object_or_404(
+            Review, pk=self.kwargs['review_id'], title=title)
         serializer.save(author=self.request.user, review=review)

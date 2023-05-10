@@ -1,5 +1,9 @@
 from django.db import models
-from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
+from django.contrib.auth.models import (
+    AbstractBaseUser,
+    BaseUserManager,
+    PermissionsMixin
+)
 
 
 class UserManager(BaseUserManager):
@@ -64,11 +68,13 @@ class Title(models.Model):
     year = models.PositiveIntegerField(default=0)
     description = models.TextField(blank=True, null=True)
     genre = models.ManyToManyField(Genre)
-    category = models.ForeignKey(Category, on_delete=models.DO_NOTHING)
+    category = models.ForeignKey(Category,
+                                 on_delete=models.DO_NOTHING)
 
 
 class Review(models.Model):
-    title = models.ForeignKey(Title, on_delete=models.CASCADE, related_name="reviews")
+    title = models.ForeignKey(Title, on_delete=models.CASCADE,
+                              related_name="reviews")
     text = models.TextField()
     author = models.ForeignKey(User, on_delete=models.CASCADE)
     score = models.PositiveIntegerField(default=0)
