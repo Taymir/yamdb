@@ -59,6 +59,15 @@ jobs:
     runs-on: ubuntu-latest
     # needs: build_and_push_to_docker_hub
     steps:
+      - name: Copy docker-compose and nginx config
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.YACLOUD_HOST }}
+          username: ${{ secrets.YACLOUD_USER }}
+          key: ${{ secrets.YACLOUD_SSHKEY }}
+          source: "docker-compose.yaml, host.conf"
+          target: ~/code
+
       - name: executing remote ssh commands to deploy
         uses: appleboy/ssh-action@v0.1.10
         with:
@@ -68,4 +77,4 @@ jobs:
           script: |
             sudo docker pull taymir007/yamdb
             sudo docker compose stop
-            sudo docker compose up -d
+            sudo docker compose up -d --build
