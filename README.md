@@ -1,3 +1,4 @@
+[![Badge](https://github.com/Taymir/Yamdb/actions/workflows/yamdb.yaml/badge.svg)](https://github.com/Taymir/yamdb/actions/workflows/yamdb.yaml)
 # API Yamdb
 Yamdb предоставляет API для работы с рецензиями на фильмы, книги, музыкальные произведения и другие подобные объекты
 
